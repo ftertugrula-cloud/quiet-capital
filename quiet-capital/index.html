@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quiet Capital — Production Studio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --muted: #777;
+    --accent: #c8a96e;
+    --accent2: #e8c990;
+    --danger: #e05555;
+    --success: #4caf82;
+    --info: #5b9bd5;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'Inter', sans-serif;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 14px; line-height: 1.6; }
+  body { min-height: 100vh; }
+
+  /* Layout */
+  .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    display: block;
+  }
+  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+    background: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,169,110,0.06); }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+
+  /* Main */
+  .main { padding: 40px 48px; max-width: 900px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Page headers */
+  .page-title { font-family: var(--font-display); font-size: 28px; color: var(--text); margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+
+  /* Keys section */
+  .keys-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .keys-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+  .keys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; display: block; letter-spacing: 0.04em; }
+  .field-input {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  .field-input:focus { outline: none; border-color: var(--accent); }
+  .field-input::placeholder { color: var(--muted); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn:hover { border-color: var(--border2); background: #222; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-gold {
+    background: var(--accent);
+    color: #0a0a0a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .btn-gold:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* Error */
+  .err { color: var(--danger); font-size: 12px; margin-top: 8px; display: none; }
+
+  /* Ideas page */
+  .ideas-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 16px; }
+  .idea-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .idea-card:hover { border-color: var(--accent); background: rgba(200,169,110,0.05); }
+  .idea-num { font-size: 11px; color: var(--muted); min-width: 22px; font-variant-numeric: tabular-nums; }
+  .idea-title { font-size: 14px; color: var(--text); flex: 1; line-height: 1.4; }
+  .idea-format { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border: 1px solid var(--border2); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .idea-arrow { color: var(--accent); font-size: 14px; opacity: 0; transition: opacity 0.15s; }
+  .idea-card:hover .idea-arrow { opacity: 1; }
+
+  /* Produce page */
+  .topic-wrap { margin-bottom: 20px; }
+  .topic-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: var(--font-display);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  .topic-input:focus { outline: none; border-color: var(--accent); }
+  .topic-input::placeholder { color: var(--muted); font-family: var(--font-body); font-size: 14px; }
+
+  /* Progress steps */
+  .steps-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin: 24px 0;
+    display: none;
+  }
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .step-row:last-child { border-bottom: none; }
+  .step-row.active { color: var(--text); }
+  .step-row.done { color: var(--success); }
+  .step-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+  .step-row.done .step-dot { background: rgba(76,175,130,0.15); border-color: var(--success); color: var(--success); }
+  .step-row.active .step-dot { background: rgba(91,155,213,0.15); border-color: var(--info); }
+  .spin { display: inline-block; width: 11px; height: 11px; border: 1.5px solid rgba(91,155,213,0.3); border-top-color: var(--info); border-radius: 50%; animation: sp 0.7s linear infinite; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  /* Output tabs */
+  .out-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    margin-top: 32px;
+  }
+  .out-tab {
+    padding: 9px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: none;
+    font-family: var(--font-body);
+    transition: color 0.15s;
+  }
+  .out-tab:hover { color: var(--text); }
+  .out-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .out-content { display: none; }
+  .out-content.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
+  .script-body { font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+  .script-body::-webkit-scrollbar { width: 4px; }
+  .script-body::-webkit-scrollbar-track { background: transparent; }
+  .script-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* Images grid */
+  .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .img-cell a { display: block; }
+  .img-cell img { width: 100%; border-radius: 6px; display: block; aspect-ratio: 16/9; object-fit: cover; transition: opacity 0.15s; }
+  .img-cell img:hover { opacity: 0.85; }
+  .img-cell .img-ts { font-size: 10px; color: var(--muted); text-align: center; margin-top: 4px; }
+  .img-fail { background: var(--surface2); border-radius: 6px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); }
+
+  /* Thumbnails */
+  .thumb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .thumb-cell img { width: 100%; border-radius: var(--radius); display: block; transition: opacity 0.15s; }
+  .thumb-cell img:hover { opacity: 0.85; }
+  .thumb-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+  /* Audio */
+  audio { width: 100%; margin: 8px 0; accent-color: var(--accent); }
+  .dl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 13px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .dl-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Meta */
+  .meta-body { font-size: 13px; color: var(--text); line-height: 1.8; }
+  .meta-body strong { color: var(--accent); font-weight: 500; display: block; margin-top: 14px; margin-bottom: 2px; }
+  .meta-body strong:first-child { margin-top: 0; }
+
+  /* Related ideas */
+  .related-wrap { margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px; }
+  .related-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
+  .related-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .related-item:hover { border-color: var(--accent); background: rgba(200,169,110,0.05); }
+  .related-arrow { font-size: 11px; color: var(--accent); }
+
+  /* Top 5 ranking */
+  .top5-section { margin-bottom: 32px; }
+  .top5-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .top5-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .top5-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .top5-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .top5-card:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+  .top5-card:hover::before { opacity: 1; }
+  .top5-rank { font-family: var(--font-display); font-size: 28px; color: var(--accent); min-width: 36px; line-height: 1; padding-top: 2px; opacity: 0.6; }
+  .top5-body { flex: 1; }
+  .top5-title { font-size: 15px; color: var(--text); line-height: 1.4; margin-bottom: 6px; font-weight: 500; }
+  .top5-reason { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .top5-score { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 60px; }
+  .top5-pct { font-size: 20px; font-weight: 600; color: var(--accent); }
+  .top5-pct-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .top5-produce-btn {
+    margin-top: 10px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    border-radius: var(--radius);
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .top5-produce-btn:hover { background: var(--accent); color: #0a0a0a; }
+  .divider-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 28px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Character lock section */
+  .char-section { margin-bottom: 1.5rem; }
+  .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  .char-option { border: 2px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: all 0.15s; position: relative; }
+  .char-option:hover { border-color: var(--accent); }
+  .char-option.selected { border-color: var(--accent); }
+  .char-option.selected::after { content: 'Locked'; position: absolute; top: 6px; right: 6px; background: var(--accent); color: #0a0a0a; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .char-option img { width: 100%; display: block; aspect-ratio: 1; object-fit: cover; }
+  .char-locked-banner { display: flex; align-items: center; gap: 12px; background: rgba(76,175,130,0.08); border: 1px solid var(--success); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 1rem; }
+  .char-locked-banner img { width: 56px; height: 56px; border-radius: var(--radius); object-fit: cover; flex-shrink: 0; }
+  .char-locked-text { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
+  .char-locked-text strong { color: var(--success); }
+  .char-reset-btn { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; background: none; border: none; }
+
+  /* Footer space */
+  .main { padding-bottom: 80px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-name">Quiet Capital</span>
+      <span class="logo-sub">Production Studio</span>
+    </div>
+    <button class="nav-item active" onclick="showPage('keys',this)">
+      <span class="nav-icon">⚙</span> API Keys
+    </button>
+    <button class="nav-item" onclick="showPage('character',this)">
+      <span class="nav-icon">🧑</span> Character
+    </button>
+    <button class="nav-item" onclick="showPage('ideas',this)">
+      <span class="nav-icon">💡</span> Video Ideas
+    </button>
+    <button class="nav-item" onclick="showPage('produce',this)">
+      <span class="nav-icon">▶</span> Produce
+    </button>
+  </aside>
+
+  <main class="main">
+
+    <!-- Keys page -->
+    <div class="page active" id="page-keys">
+      <h1 class="page-title">Setup</h1>
+      <p class="page-sub">Enter your API keys once — they're saved in your browser only.</p>
+      <div class="keys-section">
+        <p class="keys-title">API Keys</p>
+        <div class="keys-grid">
+          <div>
+            <label class="field-label">Anthropic</label>
+            <input class="field-input" type="password" id="k-ant" placeholder="sk-ant-..." autocomplete="off" oninput="saveKeys()" />
+          </div>
+          <div>
+            <label class="field-label">Elevate Labs API key (for images via MCP)</label>
+            <input class="field-input" type="password" id="k-fal" placeholder="elevate-labs-key..." autocomplete="off" oninput="saveKeys()" />
+          </div>
+          <div>
+            <label class="field-label">ElevenLabs</label>
+            <input class="field-input" type="password" id="k-el" placeholder="elevenlabs key" autocomplete="off" oninput="saveKeys()" />
+          </div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.7">Keys are stored in localStorage in your browser. They never leave your device except as request headers to the respective APIs.<br><br>
+      <strong style="color:var(--accent)">Anthropic key</strong> — for script generation (claude.ai → API keys)<br>
+      <strong style="color:var(--accent)">Elevate Labs key</strong> — for image generation via Nano Banana Pro (elevate.uno → Dashboard → API Keys)<br><br>
+      Once saved, go to <strong style="color:var(--accent)">Video Ideas</strong> to generate 30 ideas, or jump to <strong style="color:var(--accent)">Produce</strong> to generate a full video package.</p>
+    </div>
+
+    <!-- Character page -->
+    <div class="page" id="page-character">
+      <h1 class="page-title">Character</h1>
+      <p class="page-sub">Generate and lock your channel's character. This reference image will be used for every scene and thumbnail going forward to keep the character consistent.</p>
+
+      <div id="char-locked-banner" style="display:none"></div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <p class="card-label">Upload your own character image</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">Upload a reference image of your character and it will be locked and used for all scene and thumbnail generation. This is the fastest way to get consistent results.</p>
+        <input type="file" id="char-upload-input" accept="image/*" class="field-input" style="margin-bottom:10px" onchange="handleCharacterUpload(this)" />
+        <div id="char-upload-preview" style="display:none;margin-top:10px">
+          <img id="char-upload-img" style="max-width:200px;border-radius:var(--radius);border:2px solid var(--accent)" />
+          <p style="font-size:12px;color:var(--success);margin-top:6px">✓ Character locked from uploaded image</p>
+        </div>
+      </div>
+
+      <div style="margin:16px 0;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">or generate one</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <label class="field-label">Character description</label>
+      <input class="field-input" type="text" id="char-desc" placeholder="e.g. young man, dark spiky hair, navy shirt, round face, simple flat cartoon illustration style, friendly expression" value="semi-flat 2D animated explainer video character, young adult male, realistic head and face proportions with soft cel-shading and subtle gradients for depth, slightly wavy dark brown hair with gentle volume and soft shading on top, warm skin tone with subtle soft shading on the face (no harsh blush), small black dot eyes with subtle highlight, simple thin dark eyebrows, calm thoughtful expression, plain grey crewneck sweater with soft fabric shading and folds, clean thin black outlines, warm muted color palette with rich tones, plain neutral light background, character turned slightly to the side, professional animated explainer video character design, character reference sheet" />
+      <button class="btn btn-gold" id="char-btn" onclick="generateCharacterOptions()" style="margin-top:10px">Generate 3 character options →</button>
+      <div class="err" id="char-err"></div>
+
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+        <p class="card-label">Test single image before generating all 70</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6">Enter a simple scene description and generate one test image to verify your character looks right. Don't proceed to full generation until this looks correct.</p>
+        <input class="field-input" type="text" id="test-scene" placeholder="e.g. young man standing outside a bank looking at his phone, city street" style="margin-bottom:10px" />
+        <button class="btn btn-gold" id="test-btn" onclick="testSingleImage()">Test 1 image →</button>
+        <div class="err" id="test-err"></div>
+        <div id="test-result" style="margin-top:12px;display:none">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:6px">Test result — does this look right?</p>
+          <img id="test-img" style="width:100%;max-width:400px;border-radius:var(--radius);border:1px solid var(--border)" />
+        </div>
+      </div>
+
+      <div class="char-grid" id="char-grid"></div>
+    </div>
+
+    <!-- Ideas page -->
+    <div class="page" id="page-ideas">
+      <h1 class="page-title">Video Ideas</h1>
+      <p class="page-sub">Generate 30 original ideas, ranked by predicted performance. Click any top pick to start producing immediately.</p>
+      <button class="btn btn-gold" id="ideas-btn" onclick="generateIdeas()">Generate 30 ideas + rank top 5 →</button>
+      <div class="err" id="ideas-err"></div>
+      <div id="top5-wrap" style="display:none;margin-top:28px">
+        <div class="top5-label">Top 5 predicted performers</div>
+        <div id="top5-list"></div>
+        <div class="divider-label">All 30 ideas</div>
+      </div>
+      <div class="ideas-grid" id="ideas-list"></div>
+    </div>
+
+    <!-- Produce page -->
+    <div class="page" id="page-produce">
+      <h1 class="page-title">Produce</h1>
+      <p class="page-sub">Generate the script first. Then jump to any tab — Thumbnails, Images, or Metadata — independently, in any order, any time.</p>
+      <div id="char-warning" style="display:none;background:rgba(224,85,85,0.08);border:1px solid var(--danger);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:1rem;font-size:13px;color:var(--text)">No character locked yet — images will use generic style and won't be consistent. <a href="#" onclick="showPage('character',document.querySelectorAll('.nav-item')[1]);return false" style="color:var(--accent)">Go lock a character first →</a></div>
+      <div class="topic-wrap">
+        <input class="topic-input" type="text" id="topic" placeholder="e.g. You Have $10 Million and Nobody Knows" />
+      </div>
+      <button class="btn btn-gold btn-full" id="prod-btn" onclick="startScriptGeneration()">Generate script →</button>
+      <div class="err" id="prod-err"></div>
+
+      <div style="margin:24px 0;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">or</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <label class="field-label">Already have a script? Paste it here to skip straight to thumbnails/images</label>
+      <input class="field-input" type="text" id="existing-title" placeholder="Video title" style="margin-bottom:8px" />
+      <textarea class="field-input" id="existing-script" placeholder="Paste your full script here..." style="min-height:120px;resize:vertical;font-family:var(--font-body)"></textarea>
+      <button class="btn btn-full" id="existing-btn" onclick="startFromExistingScript()" style="margin-top:10px">Generate scene prompts + thumbnails from this script →</button>
+
+      <div class="steps-wrap" id="steps-wrap">
+        <div class="step-row" id="s-script"><div class="step-dot"></div><span>Writing script + metadata</span></div>
+        <div class="step-row" id="s-scenes"><div class="step-dot"></div><span>Generating scene + thumbnail prompts</span></div>
+      </div>
+
+      <div id="prod-output" style="display:none">
+        <div class="out-tabs">
+          <button class="out-tab active" onclick="switchTab('script',this)">Script</button>
+          <button class="out-tab" onclick="switchTab('thumbs',this)">Thumbnails</button>
+          <button class="out-tab" onclick="switchTab('audiostep',this)">Images</button>
+          <button class="out-tab" onclick="switchTab('meta',this)">Metadata</button>
+        </div>
+        <div class="out-content active" id="ot-script">
+          <div class="card"><p class="card-label">Full script — copy this into ElevenLabs</p><div class="script-body" id="out-script"></div></div>
+        </div>
+        <div class="out-content" id="ot-thumbs">
+          <div class="card">
+            <p class="card-label">Thumbnails</p>
+            <button class="btn btn-gold" id="thumb-btn" onclick="startThumbnailGeneration()" style="margin-bottom:14px">Generate 2 thumbnail options →</button>
+            <div class="err" id="thumb-err"></div>
+            <div class="steps-wrap" id="thumb-steps-wrap" style="display:none">
+              <div class="step-row" id="s-thumb"><div class="step-dot"></div><span>Generating 2 thumbnail options</span></div>
+            </div>
+            <div class="thumb-grid" id="out-thumbs"></div>
+          </div>
+        </div>
+        <div class="out-content" id="ot-audiostep">
+          <div class="card">
+            <p class="card-label">Scene images</p>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Upload your ElevenLabs voiceover MP3. First generate a 10-image preview to verify character and style, then proceed to full generation.</p>
+            <input type="file" id="audio-upload" accept="audio/*" class="field-input" style="margin-bottom:12px" />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+              <button class="btn btn-gold" id="preview-btn" onclick="startPreviewGeneration()">Preview first 10 images →</button>
+              <button class="btn btn-gold" id="img-btn" onclick="startImageGeneration()" style="opacity:0.4" disabled>Generate all 70 images →</button>
+            </div>
+            <div id="img-progress" style="display:none;margin-top:10px;font-size:13px;color:var(--muted);text-align:center"></div>
+            <div class="err" id="img-err"></div>
+          </div>
+          <div class="steps-wrap" id="img-steps-wrap">
+            <div class="step-row" id="s-images"><div class="step-dot"></div><span>Generating scene images (Elevate Labs — Nano Banana Pro)</span></div>
+          </div>
+          <div id="preview-output" style="display:none">
+            <div class="card">
+              <p class="card-label">Preview — first 10 images</p>
+              <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Check character consistency and style. If satisfied, click "Generate all 70 images" above.</p>
+              <div class="img-grid" id="preview-images"></div>
+            </div>
+          </div>
+          <div id="img-output" style="display:none">
+            <div class="card"><p class="card-label">All scene images — timestamped to your audio</p><button class="btn btn-gold" id="zip-btn" onclick="downloadAllImagesZip()" style="margin-bottom:14px">Download all as ZIP →</button><div class="img-grid" id="out-images"></div></div>
+          </div>
+        </div>
+        <div class="out-content" id="ot-meta">
+          <div class="card"><p class="card-label">YouTube metadata</p><div class="meta-body" id="out-meta"></div></div>
+        </div>
+        <div class="related-wrap" id="related-wrap" style="display:none">
+          <p class="related-title">Up next — related ideas</p>
+          <div id="related-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Key persistence
+function saveKeys(){
+  localStorage.setItem('qc_ant',document.getElementById('k-ant').value);
+  localStorage.setItem('qc_fal',document.getElementById('k-fal').value);
+}
+function loadKeys(){
+  const a=localStorage.getItem('qc_ant')||'';
+  const f=localStorage.getItem('qc_fal')||'';
+  document.getElementById('k-ant').value=a;
+  document.getElementById('k-fal').value=f;
+}
+loadKeys();
+
+function antKey(){return document.getElementById('k-ant').value.trim()}
+function falKey(){return document.getElementById('k-fal').value.trim()} // Google Gemini key
+
+
+function showPage(p,btn){
+  if(p==='produce'){
+    const w=document.getElementById('char-warning');
+    if(w)w.style.display=getLockedCharacter()?'none':'block';
+  }
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+function switchTab(n,btn){
+  document.querySelectorAll('.out-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.out-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('ot-'+n).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+function setStep(id,state){
+  const el=document.getElementById(id);
+  el.className='step-row '+state;
+  const dot=el.querySelector('.step-dot');
+  if(state==='done')dot.innerHTML='✓';
+  else if(state==='active')dot.innerHTML='<span class="spin"></span>';
+  else dot.innerHTML='';
+}
+
+function ts(i,total,dur){
+  if(!dur)dur=900;
+  const s=Math.round((i/total)*dur);
+  return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+}
+
+async function callClaude(system,user,maxTokens=4000){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':antKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens,system,messages:[{role:'user',content:user}]})
+  });
+  if(!r.ok){
+    const errBody=await r.text().catch(()=>'');
+    throw new Error('Claude API error '+r.status+' — '+errBody.slice(0,300));
+  }
+  const d=await r.json();
+  return d.content[0].text.replace(/```json|```/g,'').trim();
+}
+
+async function produceIdea(title){
+  document.getElementById('topic').value=title;
+  showPage('produce',document.querySelectorAll('.nav-item')[2]);
+  startScriptGeneration();
+}
+
+async function generateIdeas(){
+  if(!antKey()){showErr('ideas-err','Add your Anthropic key in Setup');return}
+  showErr('ideas-err','');
+  const btn=document.getElementById('ideas-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('ideas-list').innerHTML='';
+  document.getElementById('top5-wrap').style.display='none';
+  document.getElementById('top5-list').innerHTML='';
+  try{
+    const system=`Your job is to generate ORIGINAL video ideas for a finance storytelling channel.
+
+MOST IMPORTANT RULE — understand why Another Story's top videos work:
+- "How Banks Treat You at Every Level of Wealth" — 404K views
+- "What Happens If You Invest $100 Every Month" — 292K views
+- "8 Levels of Investing — How the Game Changes at Every Stage" — 153K views
+- "Your Life If You Start Building Wealth in Your 30s"
+- "Your Life at Every Level of the 1%"
+
+These work because they tap into UNIVERSAL dreams and fears every single person relates to:
+- Everyone has a bank account and wonders if they're being treated fairly
+- Everyone has a small amount of money and wonders what would happen if they invested it
+- Everyone is at some stage of their financial journey and wants to see the next level
+- Everyone has asked "what if I had done this differently?"
+
+THE CORE FORMULA: Universal financial experience or dream + what would your life look like
+
+IDEAS must be about things EVERYONE understands and has felt:
+- Saving money, investing small amounts, credit scores, debt, salaries, rent, mortgages
+- What life looks like at different income or wealth levels
+- Common financial decisions and their long-term consequences
+- The feeling of going from broke to stable to wealthy
+- How financial systems treat you differently based on your status
+- Dreams everyone has: retiring early, passive income, never worrying about money again
+
+TITLE FORMULAS that work — use these structures with fresh topics:
+- "What Happens If You [common financial action] (Most People Don't Realize This)"
+- "How [familiar system] Treats You at Every Level of [wealth/income]"
+- "X Levels of [universal finance topic] — How Everything Changes"
+- "Your Life If You [common financial decision people relate to]"
+- "You [started/saved/invested] $[relatable small amount]. Here's What Happened Over [X] Years."
+- "What Nobody Tells You About [universal financial milestone]"
+- "Your Life at Every Level of [income/wealth/debt people actually experience]"
+
+AVOID: obscure niche assets, business acquisitions only rich people relate to, topics requiring prior financial knowledge to be interesting, anything complicated.
+
+KEEP IT SIMPLE: The best title is one where someone scrolling at midnight thinks "wait, that's literally me."
+
+Every idea MUST pass this test:
+1. Would a 25-year-old earning $40K/year immediately relate to this?
+2. Does it make them feel like they're being shown something about THEIR life?
+3. Is there a dream, a fear, or a "what if" at the core?
+4. Can it be told as a cinematic "You" journey with emotional payoff?
+
+Respond ONLY with valid JSON array, no markdown, no explanation:
+[{"title":"...","format":"narrative|levels|scenario"}]`;
+    const raw=await callClaude(system,'Generate 30 Quiet Capital video ideas',2500);
+    const ideas=JSON.parse(raw);
+
+    // Now rank top 5
+    btn.textContent='Ranking top performers...';
+    const rankSystem=`You are the creative director of Quiet Capital, a cinematic finance storytelling channel.
+
+You will receive 30 video ideas. Rank the TOP 5 that will get 100K+ views.
+
+The channel's proven top performers all share ONE thing: they sell a dream or speak to a fear that EVERY person has felt regardless of income level. The viewer sees the title and thinks "that's me" or "I've always wondered that."
+
+FIRST — disqualify any idea that:
+- Is too niche or obscure (most people wouldn't immediately relate)
+- Requires financial knowledge to find interesting
+- Reads like an explainer or educational video rather than a personal story
+- Can't be told as a cinematic "You" journey with emotional arc
+- Only appeals to wealthy or financially sophisticated viewers
+
+THEN rank the remaining ideas on:
+1. Universal relatability — does EVERYONE immediately feel this is about them?
+2. Dream/fear factor — does it tap into something people deeply want or worry about?
+3. Emotional arc — broke → struggle → transformation → payoff
+4. Curiosity gap — does the title make you need to click to find out what happens?
+5. Retention pull — will someone watch all 15 minutes?
+6. Simplicity — could a 22-year-old with $200 in their account immediately care about this?
+
+The highest scoring ideas should feel like Another Story's best titles — simple, universal, emotionally loaded, selling a dream anyone can picture themselves in.
+
+Respond ONLY with valid JSON array of exactly 5 items, no markdown:
+[{"rank":1,"title":"exact title from the list","score":92,"reason":"2 sentence explanation of why every person will relate and watch to the end"}]`;
+
+    const ideasText=ideas.map((id,i)=>`${i+1}. ${id.title}`).join('\n');
+    const rankRaw=await callClaude(rankSystem,`Rank the top 5 from these 30 ideas:\n${ideasText}`,1000);
+    const top5=JSON.parse(rankRaw);
+
+    // Render top 5
+    const top5list=document.getElementById('top5-list');
+    top5.forEach(item=>{
+      const card=document.createElement('div');
+      card.className='top5-card';
+      card.innerHTML=`
+        <div class="top5-rank">${item.rank}</div>
+        <div class="top5-body">
+          <div class="top5-title">${item.title}</div>
+          <div class="top5-reason">${item.reason}</div>
+          <button class="top5-produce-btn" onclick="event.stopPropagation();produceIdea('${item.title.replace(/'/g,"\'")}')">Produce this video →</button>
+        </div>
+        <div class="top5-score">
+          <div class="top5-pct">${item.score}</div>
+          <div class="top5-pct-label">score</div>
+        </div>`;
+      card.onclick=()=>produceIdea(item.title);
+      top5list.appendChild(card);
+    });
+    document.getElementById('top5-wrap').style.display='block';
+
+    // Render all 30
+    const list=document.getElementById('ideas-list');
+    ideas.forEach((idea,i)=>{
+      const div=document.createElement('div');
+      div.className='idea-card';
+      div.innerHTML=`<span class="idea-num">${String(i+1).padStart(2,'0')}</span><span class="idea-title">${idea.title}</span><span class="idea-format">${idea.format}</span><span class="idea-arrow">→</span>`;
+      div.onclick=()=>{
+        document.getElementById('topic').value=idea.title;
+        showPage('produce',document.querySelectorAll('.nav-item')[2]);
+      };
+      list.appendChild(div);
+    });
+  }catch(e){showErr('ideas-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate 30 ideas + rank top 5 →'}
+}
+
+// ---- Character lock ----
+function getLockedCharacter(){
+  return localStorage.getItem('qc_character_url') || null;
+}
+function setLockedCharacter(url){
+  localStorage.setItem('qc_character_url', url);
+  renderCharBanner();
+}
+function clearLockedCharacter(){
+  localStorage.removeItem('qc_character_url');
+  renderCharBanner();
+}
+function renderCharBanner(){
+  const url=getLockedCharacter();
+  const banner=document.getElementById('char-locked-banner');
+  if(!banner)return;
+  if(url){
+    banner.style.display='flex';
+    banner.className='char-locked-banner';
+    banner.innerHTML=`<img src="${url}" alt="Locked character" /><div class="char-locked-text"><strong>Character locked.</strong> This reference will be used for every scene and thumbnail.</div><button class="char-reset-btn" onclick="clearLockedCharacter();document.getElementById('char-grid').innerHTML='';">Reset</button>`;
+  }else{
+    banner.style.display='none';
+  }
+}
+renderCharBanner();
+
+function handleCharacterUpload(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const dataUrl = e.target.result;
+    // Store as data URL directly in localStorage
+    localStorage.setItem('qc_character_url', dataUrl);
+    // Show preview
+    const preview = document.getElementById('char-upload-preview');
+    const img = document.getElementById('char-upload-img');
+    img.src = dataUrl;
+    preview.style.display = 'block';
+    // Update the locked banner
+    renderCharBanner();
+  };
+  reader.readAsDataURL(file);
+}
+
+async function testSingleImage(){
+  const scene = document.getElementById('test-scene').value.trim();
+  const ref = getLockedCharacter();
+  if(!falKey()){showErr('test-err','Add your Fal.ai key in Setup first');return}
+  if(!scene){showErr('test-err','Enter a scene description');return}
+  showErr('test-err','');
+  const btn = document.getElementById('test-btn');
+  btn.disabled=true; btn.textContent='Generating...';
+  document.getElementById('test-result').style.display='none';
+  try{
+    cachedCharacterPublicUrl = null; // Reset cache for fresh test
+    let url;
+    if(ref){
+      url = await falGenerateWithCharacter(scene, ref);
+    }else{
+      url = await falGenerateImage(scene);
+    }
+    document.getElementById('test-img').src = url;
+    document.getElementById('test-result').style.display='block';
+  }catch(e){
+    showErr('test-err','Error: '+e.message);
+  }finally{
+    btn.disabled=false; btn.textContent='Test 1 image →';
+  }
+}
+
+async function generateCharacterOptions(){
+  if(!falKey()){showErr('char-err','Add your Google Gemini key in Setup first');return}
+  const desc=document.getElementById('char-desc').value.trim();
+  if(!desc){showErr('char-err','Enter a character description');return}
+  showErr('char-err','');
+  const btn=document.getElementById('char-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('char-grid').innerHTML='';
+  try{
+    const urls=[];
+    for(let i=0;i<3;i++){
+      try{
+        const url=await falGenerateImage(desc);
+        urls.push(url);
+      }catch(e){
+        showErr('char-err','Error: '+e.message);
+      }
+    }
+    const grid=document.getElementById('char-grid');
+    urls.forEach(url=>{
+      const cell=document.createElement('div');
+      cell.className='char-option';
+      cell.innerHTML=`<img src="${url}" alt="character option" />`;
+      cell.onclick=()=>{
+        document.querySelectorAll('.char-option').forEach(c=>c.classList.remove('selected'));
+        cell.classList.add('selected');
+        setLockedCharacter(url);
+      };
+      grid.appendChild(cell);
+    });
+  }catch(e){showErr('char-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate 3 character options →'}
+}
+
+let currentScenes=null;
+let currentThumbnailPrompts=null;
+let currentThumbnailText=null;
+let currentTopic=null;
+
+async function startScriptGeneration(){
+  const topic=document.getElementById('topic').value.trim();
+  if(!antKey()||!falKey()){showErr('prod-err','Add all API keys in Setup first');return}
+  if(!topic){showErr('prod-err','Enter a video topic');return}
+  showErr('prod-err','');
+  const btn=document.getElementById('prod-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('steps-wrap').style.display='block';
+  document.getElementById('prod-output').style.display='none';
+  document.getElementById('img-output').style.display='none';
+  document.getElementById('out-thumbs').innerHTML='';
+  ['s-script','s-scenes'].forEach(s=>setStep(s,''));
+  try{
+    setStep('s-script','active');
+    const data=await generateScriptOnly_impl(topic);
+    setStep('s-script','done');
+
+    setStep('s-scenes','active');
+    const scenesData=await generateScenes(data.title,data.script);
+    setStep('s-scenes','done');
+    currentScenes=scenesData.scenes;
+    currentThumbnailPrompts=scenesData.thumbnailPrompts;
+    currentThumbnailText=scenesData.thumbnailText||[];
+    currentTopic=topic;
+
+    renderScriptOutput(data);
+    document.getElementById('out-meta').innerHTML=`<strong>Title</strong>${data.title}<strong>Description</strong>${data.description}<strong>Tags</strong>${data.tags.join(', ')}`;
+    document.getElementById('prod-output').style.display='block';
+    generateRelated(topic);
+  }catch(e){showErr('prod-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate script →'}
+}
+
+async function startFromExistingScript(){
+  const title=document.getElementById('existing-title').value.trim();
+  const script=document.getElementById('existing-script').value.trim();
+  if(!antKey()||!falKey()){showErr('prod-err','Add all API keys in Setup first');return}
+  if(!title||!script){showErr('prod-err','Enter both a title and the full script');return}
+  showErr('prod-err','');
+  const btn=document.getElementById('existing-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('steps-wrap').style.display='block';
+  document.getElementById('prod-output').style.display='none';
+  document.getElementById('img-output').style.display='none';
+  document.getElementById('out-thumbs').innerHTML='';
+  setStep('s-script','done');
+  ['s-scenes'].forEach(s=>setStep(s,''));
+  try{
+    setStep('s-scenes','active');
+    const scenesData=await generateScenes(title,script);
+    setStep('s-scenes','done');
+    currentScenes=scenesData.scenes;
+    currentThumbnailPrompts=scenesData.thumbnailPrompts;
+    currentThumbnailText=scenesData.thumbnailText||[];
+    currentTopic=title;
+
+    renderScriptOutput({script});
+    document.getElementById('out-meta').innerHTML=`<strong>Title</strong>${title}<strong>Note</strong>Metadata not generated — this script was pasted directly. Generate a new script from a topic to get full SEO metadata.`;
+    document.getElementById('prod-output').style.display='block';
+    generateRelated(title);
+  }catch(e){showErr('prod-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate scene prompts + thumbnails from this script →'}
+}
+
+async function startThumbnailGeneration(){
+  if(!falKey()){showErr('thumb-err','Add your Google Gemini key in Setup first');return}
+  if(!currentThumbnailPrompts){showErr('thumb-err','Generate the script first');return}
+  showErr('thumb-err','');
+  const btn=document.getElementById('thumb-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('thumb-steps-wrap').style.display='block';
+  setStep('s-thumb','active');
+  try{
+    const thumbs=await generateThumbnails(currentThumbnailPrompts);
+    setStep('s-thumb','done');
+    await renderThumbsOutput(thumbs,currentThumbnailText);
+  }catch(e){showErr('thumb-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate 2 thumbnail options →'}
+}
+
+async function startPreviewGeneration(){
+  const fileInput=document.getElementById('audio-upload');
+  if(!fileInput.files[0]){showErr('img-err','Please upload your voiceover MP3 first');return}
+  if(!currentScenes){showErr('img-err','Generate the script first (Step 1)');return}
+  showErr('img-err','');
+  const btn=document.getElementById('preview-btn');
+  btn.disabled=true;btn.textContent='Generating preview...';
+  document.getElementById('img-steps-wrap').style.display='block';
+  document.getElementById('preview-output').style.display='none';
+  setStep('s-images','');
+  falErrorShown=false;
+  try{
+    const duration=await getAudioDuration(fileInput.files[0]);
+    setStep('s-images','active');
+    // Only generate first 10 scenes
+    const previewScenes=currentScenes.slice(0,10);
+    resetChain();
+    const images=await generateImages(previewScenes,duration,0,10);
+    setStep('s-images','done');
+    // Render preview grid
+    const grid=document.getElementById('preview-images');
+    grid.innerHTML='';
+    images.forEach(img=>{
+      const cell=document.createElement('div');
+      cell.className='img-cell';
+      if(img.url){
+        cell.innerHTML=`<a href="${img.url}" download="${img.timestamp.replace(':','-')}.jpg" target="_blank"><img src="${img.url}" alt="scene ${img.timestamp}" /></a><div class="img-ts">${img.timestamp}</div>`;
+      }else{
+        cell.innerHTML=`<div class="img-fail">Failed</div><div class="img-ts">${img.timestamp}</div>`;
+      }
+      grid.appendChild(cell);
+    });
+    document.getElementById('preview-output').style.display='block';
+    // Enable full generation button
+    const fullBtn=document.getElementById('img-btn');
+    fullBtn.disabled=false;
+    fullBtn.style.opacity='1';
+  }catch(e){showErr('img-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Preview first 10 images →'}
+}
+
+async function startImageGeneration(){
+  const fileInput=document.getElementById('audio-upload');
+  if(!fileInput.files[0]){showErr('img-err','Please upload your voiceover MP3 first');return}
+  if(!currentScenes){showErr('img-err','Generate the script first (Step 1)');return}
+  showErr('img-err','');
+  const btn=document.getElementById('img-btn');
+  btn.disabled=true;btn.textContent='Generating...';
+  document.getElementById('img-steps-wrap').style.display='block';
+  document.getElementById('img-output').style.display='none';
+  setStep('s-images','');
+  falErrorShown=false;
+  try{
+    const duration=await getAudioDuration(fileInput.files[0]);
+    setStep('s-images','active');
+    resetChain();
+    const images=await generateImages(currentScenes,duration);
+    setStep('s-images','done');
+    renderImagesOutput(images);
+    document.getElementById('img-output').style.display='block';
+  }catch(e){showErr('img-err','Error: '+e.message)}
+  finally{btn.disabled=false;btn.textContent='Generate 70 timestamped images →'}
+}
+
+function getAudioDuration(file){
+  return new Promise((resolve,reject)=>{
+    const audio=document.createElement('audio');
+    audio.preload='metadata';
+    audio.onloadedmetadata=()=>{
+      URL.revokeObjectURL(audio.src);
+      resolve(audio.duration);
+    };
+    audio.onerror=()=>reject(new Error('Could not read audio file'));
+    audio.src=URL.createObjectURL(file);
+  });
+}
+
+async function generateScriptOnly_impl(topic){
+  const scriptSystem=`You are the head writer for Quiet Capital, a YouTube channel modeled on Another Story.
+
+Write cinematic second-person "You" finance narratives structured in clear numbered LEVELS or STAGES (Level One, Level Two, etc — however many fit the topic naturally, typically 6-9).
+
+THE GOLDEN RULE: make the viewer FEEL the money, don't make them CALCULATE it.
+
+For EVERY level, follow this pattern:
+1. Open with a SPECIFIC SENSORY SCENE — a moment, a location, a time, a physical sensation. Examples: a card declining at a gas station with a line behind you, a phone buzzing with a fee alert while you're already stressed, a specific smell or sound in a specific room.
+2. Use ONE OR TWO concrete numbers max per level (a fee, a balance, a percentage) — woven INTO the scene, not listed as a budget breakdown. Never produce spreadsheet-style accounting (no "X% of take-home", no itemized monthly expense lists).
+3. Describe how the SYSTEM or PEOPLE around "you" treat you differently at this level — the bank, the landlord, a friend, a stranger. This is the emotional core.
+4. Close EACH level with a small payoff line — a shift in power, dignity, or relationship that the viewer feels.
+5. Use small human textures: a name (a teller, a neighbor, a friend), an object (a pencil behind an ear, a coffee stain), a specific small absurd detail (a $47 gym membership you forgot to cancel).
+
+Transition between levels with a clear marker ("Level Two, ...") so the structure is obvious when read aloud.
+
+AVOID: percentage breakdowns of income, itemized budgets, financial-planning language, lists of expense categories. If you catch yourself writing "X% of your take-home" or listing rent/utilities/groceries/gas as a sequence — stop and rewrite as a scene instead.
+
+No calls to action ever. Close the final level on identity/power, not on a financial summary.
+
+Respond ONLY with valid JSON, no markdown, no extra text:
+{
+  "title": "YouTube title under 70 chars",
+  "script": "full narration script 2500-3000 words, structured in numbered levels as described",
+  "description": "YouTube description 150 words with SEO keywords",
+  "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"]
+}`;
+  const scriptRaw=await callClaude(scriptSystem,`Write a full Quiet Capital video about: ${topic}`,5000);
+  try { return JSON.parse(scriptRaw); }
+  catch(e) { throw new Error('Script generation failed — please try again'); }
+}
+
+async function generateScenes(title,script){
+  const scenesSystem=`You are the visual director for Quiet Capital, a cinematic finance YouTube channel.
+
+Based on the script provided, generate exactly 70 scene image prompts and 2 thumbnail prompts.
+
+SCENE PROMPT RULES — follow exactly:
+
+Each scene prompt must be a VISUAL STORY MOMENT (40-60 words). Not a presentation slide. Not a chapter title card. A cinematic frame of a real scene happening.
+
+GLOBAL STYLE to append to EVERY prompt:
+"clean semi-flat 2D animated cartoon, cinematic finance storytelling frame, clean black outlines, soft cel shading, mature angular male character with dramatic black spiky hair, sharp jawline, narrow face, defined cheekbones, medium intense eyes, dark navy jacket or black shirt, tall slim build, detailed cinematic background, 16:9 YouTube animation frame"
+
+NEGATIVE STYLE to append to EVERY prompt:
+"not boyish, not round-faced, not childish, not generic anime, not 3D render, not photorealistic, no gibberish text, no fake letters, no messy UI, no PowerPoint slides"
+
+STRUCTURE each scene prompt as:
+1. Character pose/expression/action — very literal to the script moment
+2. Specific environment with multiple background details pulled directly from the script
+3. Lighting and atmosphere — cinematic and specific
+4. Text handling — CRITICAL RULES:
+   - If text needed is 5 words or FEWER: include exact text in quotes on a specific surface
+     GOOD: ATM screen showing "$87.43" | phone showing "LOW BALANCE" | poster showing "$850 RENT" | chart showing "+22%"
+     GOOD: sign showing "BANK" | screen showing "DECLINED" | notice showing "$920 DUE"
+   - If text needed is MORE than 5 words: describe the object with NO text content
+     GOOD: "phone screen glowing with an alert, text not visible" | "bank statement on table, numbers not readable"
+     BAD: "phone showing a notification from the bank warning about low balance" ← this creates gibberish
+5. Background signs/storefronts: use ONE real word only ("BANK", "OPEN", "ATM", "GROCERY") or omit text entirely
+
+TITLE CARDS — only generate for actual level headings from the script:
+If a level heading appears in the script (e.g. "Level one. $30,000 a year."), generate ONE title card scene for it:
+"clean dark background, bold centered text showing [LEVEL HEADING], minimal cinematic typography, no character, no background elements"
+Do NOT generate fake chapter slides or transition cards for any other reason.
+
+The character is always: male, dark spiky hair, navy shirt or grey sweater, round face, semi-flat cartoon style with soft cel-shading.
+
+Environments should match the script narrative exactly — pull specific details (numbers, places, objects, weather, named items) directly from the script text for each corresponding moment, vary between: office, coffee shop, apartment, parking lot, bank/ATM, boardroom, rainy city street at night, kitchen, car interior, restaurant, outdoor scenes.
+
+Every scene should feel like a frame from a high-production animated documentary — atmospheric, detailed, cinematic — not a generic flat icon.
+
+For the 2 thumbnails: generate prompts for CLEAN BACKGROUND SCENES with NO text, NO numbers, NO words anywhere in the image — just the character and scene. Text will be added separately afterward.
+
+Also provide a short punchy text overlay (3-6 words max, like a real YouTube thumbnail caption) for each thumbnail, based on the actual title/topic — e.g. "$32K vs $200K", "5 LEVELS OF SALARY", "Level 1 → Level 5".
+
+Respond ONLY with valid JSON, no markdown:
+{
+  "scenes": ["prompt1","prompt2",...70 total],
+  "thumbnailPrompts": [
+    "semi-flat 2D animated explainer character in dramatic finance scene with soft cel-shading, dark moody cinematic lighting with rich blue/navy tones, dramatic rim lighting on character, bold dynamic composition, NO text NO numbers NO words in image, 16:9 YouTube thumbnail background",
+    "semi-flat 2D animated explainer character with wealth visual (money, city skyline at golden hour, growth chart), warm golden hour lighting with rich orange/amber tones, dramatic sun glow, bold dynamic composition, NO text NO numbers NO words in image, 16:9 YouTube thumbnail background"
+  ],
+  "thumbnailText": ["short punchy caption for thumbnail 1","short punchy caption for thumbnail 2"]
+}`;
+  const scenesRaw=await callClaude(scenesSystem,`Generate 70 scene prompts and 2 thumbnail prompts for this script:\n\nTitle: ${title}\n\nScript: ${script}`,16000);
+  try {
+    return JSON.parse(scenesRaw);
+  } catch(e) {
+    // Try to salvage a truncated "scenes" array — common when output hits token limit
+    const salvaged = salvageScenesJson(scenesRaw);
+    if (salvaged) return salvaged;
+    console.error('Raw scenes response (failed to parse):', scenesRaw);
+    throw new Error('Scene generation failed (invalid/truncated JSON, '+scenesRaw.length+' chars received) — please try again');
+  }
+}
+
+// Attempt to recover from truncated JSON by extracting as many complete
+// "scenes" array entries and thumbnail fields as possible.
+function salvageScenesJson(raw){
+  try{
+    // Extract all complete double-quoted strings inside the "scenes" array
+    const scenesMatch = raw.match(/"scenes"\s*:\s*\[([\s\S]*?)(\]|$)/);
+    if(!scenesMatch) return null;
+    let body = scenesMatch[1];
+    // Find all complete JSON string literals (handles escaped quotes)
+    const strRegex = /"((?:[^"\\]|\\.)*)"/g;
+    let scenes = [];
+    let m;
+    while((m = strRegex.exec(body)) !== null){
+      try{ scenes.push(JSON.parse('"'+m[1]+'"')); }catch{}
+    }
+    if(scenes.length < 10) return null; // not enough to be useful
+
+    // Try to grab thumbnailPrompts and thumbnailText the same way if present
+    function extractArray(key){
+      const re = new RegExp('"'+key+'"\\s*:\\s*\\[([\\s\\S]*?)\\]');
+      const mm = raw.match(re);
+      if(!mm) return [];
+      const arr = [];
+      const r2 = /"((?:[^"\\]|\\.)*)"/g;
+      let mmm;
+      while((mmm = r2.exec(mm[1])) !== null){
+        try{ arr.push(JSON.parse('"'+mmm[1]+'"')); }catch{}
+      }
+      return arr;
+    }
+    const thumbnailPrompts = extractArray('thumbnailPrompts');
+    const thumbnailText = extractArray('thumbnailText');
+
+    console.warn(`Salvaged ${scenes.length} scene prompts from truncated response (expected 70).`);
+    return { scenes, thumbnailPrompts, thumbnailText };
+  }catch(e){
+    return null;
+  }
+}
+
+let falErrorShown=false;
+
+// Convert base64 to blob URL for display
+function base64ToUrl(b64,mime='image/png'){
+  const bin=atob(b64);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([arr],{type:mime}));
+}
+
+// Call Netlify proxy → Elevate Labs (avoids CORS)
+async function callElevateLabs(prompt, referenceImage=null, referenceMode='subject'){
+  const payload = {
+    prompt,
+    model: 'nano_banana_pro',
+    aspect_ratio: 'landscape',
+    elevate_key: falKey()
+  };
+  if(referenceImage){
+    payload.reference_image = referenceImage;
+    payload.reference_mode = referenceMode;
+  }
+  const r = await fetch('/.netlify/functions/generate-image', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!r.ok){
+    const errText = await r.text().catch(()=>'');
+    throw new Error('Image generation error '+r.status+' — '+errText.slice(0,300));
+  }
+  const d = await r.json();
+  if(d.error) throw new Error('Elevate Labs: '+d.error);
+  if(!d.url) throw new Error('No image URL: '+JSON.stringify(d).slice(0,200));
+  return d.url;
+}
+
+async function falGenerateImage(prompt){
+  return await callElevateLabs(prompt);
+}
+
+// Helper: convert blob URL or data URL to base64
+async function blobUrlToBase64(url){
+  // Handle data URLs directly (from file uploads stored in localStorage)
+  if(url.startsWith('data:')){
+    const parts = url.split(',');
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+    return {data: parts[1], mimeType};
+  }
+  // Handle blob URLs
+  const r=await fetch(url);
+  const blob=await r.blob();
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onloadend=()=>resolve({data:reader.result.split(',')[1],mimeType:blob.type||'image/png'});
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+
+
+let cachedCharacterPublicUrl = null;
+
+async function getPublicCharacterUrl(referenceUrl){
+  if(cachedCharacterPublicUrl) return cachedCharacterPublicUrl;
+  if(referenceUrl.startsWith('http')){
+    cachedCharacterPublicUrl = referenceUrl;
+    return referenceUrl;
+  }
+  // It's a data URL or blob URL — upload to Fal storage
+  const publicUrl = await uploadToFal(referenceUrl);
+  cachedCharacterPublicUrl = publicUrl;
+  return publicUrl;
+}
+
+// Elevate Labs image-to-image via Netlify proxy — character reference (subject mode)
+async function falGenerateWithCharacter(sceneDescription, originalRefUrl, lastGenUrl=null){
+  const continuityHint = lastGenUrl ? ' Maintain exact same character appearance as previous scenes.' : '';
+  const prompt = `Adult male, large round head, simple dot eyes, dark navy shirt, light skin, dark brown hair slight spike, flat 2D cartoon style. Scene: ${sceneDescription}.${continuityHint}`;
+
+  // Convert reference to base64 data URL
+  let refDataUrl = null;
+  try{
+    const res = await blobUrlToBase64(originalRefUrl);
+    refDataUrl = `data:${res.mimeType};base64,${res.data}`;
+  }catch(e){
+    console.warn('Could not load reference:', e.message);
+  }
+
+  return await callElevateLabs(prompt, refDataUrl, 'subject');
+}
+
+function updateImgProgress(current,total,status){
+  const el=document.getElementById('img-progress');
+  if(!el)return;
+  el.style.display='block';
+  const pct=Math.round((current/total)*100);
+  el.innerHTML=`
+    <div style="margin-bottom:6px">Image ${current} of ${total} — ${pct}% complete</div>
+    <div style="background:var(--border);border-radius:20px;height:6px;overflow:hidden">
+      <div style="background:var(--accent);height:100%;width:${pct}%;border-radius:20px;transition:width 0.3s"></div>
+    </div>
+    ${status?'<div style="margin-top:6px;color:var(--muted);font-size:12px">'+status+'</div>':''}
+  `;
+}
+
+async function generateImages(scenes,durationSecs,startIdx=0,totalScenes=null){
+  const results=[];
+  const prog=document.getElementById('img-progress');
+  if(prog)prog.style.display='block';
+  resetChain(); // Reset chained reference for fresh run
+  for(let i=0;i<scenes.length;i++){
+    const timestamp=ts(i,scenes.length,durationSecs);
+    const totalForTs = totalScenes || scenes.length;
+    updateImgProgress(i+1,scenes.length,'Generating image '+timestamp+'...');
+    try{
+      const url=await generateSceneImage(scenes[i]);
+      results.push({timestamp,url});
+      updateImgProgress(i+1,scenes.length,'Done: '+timestamp);
+    }catch(e){
+      // If rate limited, wait 10 seconds and retry once
+      if(e.message.includes('429')){
+        updateImgProgress(i+1,scenes.length,'Rate limit — waiting 10s...');
+        showErr('img-err','Rate limit hit — waiting 10s then continuing...');
+        await new Promise(r=>setTimeout(r,3000));
+        try{
+          const url=await generateSceneImage(scenes[i]);
+          results.push({timestamp,url});
+          showErr('img-err','');
+          updateImgProgress(i+1,scenes.length,'Resumed: '+timestamp);
+          continue;
+        }catch(e2){
+          results.push({timestamp,url:null});
+          updateImgProgress(i+1,scenes.length,'Failed after retry: '+timestamp);
+        }
+      }else{
+        results.push({timestamp,url:null});
+        updateImgProgress(i+1,scenes.length,'Error: '+e.message.slice(0,60));
+        if(!falErrorShown){
+          falErrorShown=true;
+          showErr('img-err','Image generation error: '+e.message);
+        }
+      }
+    }
+    // No delay needed - Fal.ai has no rate limits
+  }
+  return results;
+}
+
+async function generateThumbnails(prompts){
+  const results=[];
+  for(const prompt of prompts){
+    try{
+      const url=await generateSceneImage(prompt);
+      results.push(url);
+    }catch(e){
+      results.push(null);
+      if(!falErrorShown){
+        falErrorShown=true;
+        showErr('prod-err','Thumbnail generation error: '+e.message);
+      }
+    }
+  }
+  return results;
+}
+
+async function generateRelated(topic){
+  try{
+    const system=`Generate 5 related Quiet Capital video ideas. Same channel style: cinematic "You" finance narratives. Respond ONLY with JSON array no markdown: [{"title":"..."}]`;
+    const raw=await callClaude(system,`5 related ideas for: ${topic}`,500);
+    const ideas=JSON.parse(raw);
+    const wrap=document.getElementById('related-wrap');
+    const list=document.getElementById('related-list');
+    list.innerHTML='';
+    ideas.forEach(idea=>{
+      const item=document.createElement('div');
+      item.className='related-item';
+      item.innerHTML=`<span>${idea.title}</span><span class="related-arrow">Produce →</span>`;
+      item.onclick=()=>{document.getElementById('topic').value=idea.title;startScriptGeneration()};
+      list.appendChild(item);
+    });
+    wrap.style.display='block';
+  }catch{}
+}
+
+function renderScriptOutput(data){
+  document.getElementById('out-script').textContent=data.script;
+}
+
+// Draw an image + bold text overlay onto a canvas, return as data URL
+function drawThumbnailWithText(imgUrl,text){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=1280;
+      canvas.height=720;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+      if(text){
+        // Bottom gradient for text legibility
+        const grad=ctx.createLinearGradient(0,canvas.height*0.55,0,canvas.height);
+        grad.addColorStop(0,'rgba(0,0,0,0)');
+        grad.addColorStop(1,'rgba(0,0,0,0.55)');
+        ctx.fillStyle=grad;
+        ctx.fillRect(0,canvas.height*0.55,canvas.width,canvas.height*0.45);
+
+        // Bold text, wrapped, bottom-left aligned
+        const maxWidth=canvas.width*0.9;
+        let fontSize=96;
+        ctx.font=`900 ${fontSize}px Arial, sans-serif`;
+        // Shrink font until it fits in 2 lines
+        const words=text.toUpperCase().split(' ');
+        let lines=[];
+        function tryWrap(size){
+          ctx.font=`900 ${size}px Arial, sans-serif`;
+          lines=[];
+          let line='';
+          for(const w of words){
+            const test=line?line+' '+w:w;
+            if(ctx.measureText(test).width>maxWidth && line){
+              lines.push(line);
+              line=w;
+            }else{
+              line=test;
+            }
+          }
+          if(line)lines.push(line);
+          return lines;
+        }
+        lines=tryWrap(fontSize);
+        while(lines.length>2 && fontSize>40){
+          fontSize-=6;
+          lines=tryWrap(fontSize);
+        }
+
+        const lineHeight=fontSize*1.15;
+        const startY=canvas.height-40-(lines.length-1)*lineHeight;
+        ctx.textBaseline='alphabetic';
+        ctx.lineJoin='round';
+        lines.forEach((line,i)=>{
+          const y=startY+i*lineHeight;
+          ctx.font=`900 ${fontSize}px Arial, sans-serif`;
+          ctx.strokeStyle='rgba(0,0,0,0.85)';
+          ctx.lineWidth=fontSize*0.12;
+          ctx.strokeText(line,40,y);
+          ctx.fillStyle='#FFD24A';
+          ctx.fillText(line,40,y);
+        });
+      }
+
+      resolve(canvas.toDataURL('image/jpeg',0.92));
+    };
+    img.onerror=()=>reject(new Error('Could not load image for overlay'));
+    img.src=imgUrl;
+  });
+}
+
+async function renderThumbsOutput(thumbs,thumbnailText){
+  const tw=document.getElementById('out-thumbs');
+  tw.innerHTML='';
+  for(let i=0;i<thumbs.length;i++){
+    const url=thumbs[i];
+    const text=(thumbnailText&&thumbnailText[i])||'';
+    const cell=document.createElement('div');
+    cell.className='thumb-cell';
+    if(url){
+      try{
+        const composited=await drawThumbnailWithText(url,text);
+        cell.innerHTML=`<a href="${composited}" download="thumbnail-${i+1}.jpg"><img src="${composited}" alt="thumbnail ${i+1}" /></a><div class="thumb-label">Option ${i+1}${text?': "'+text+'"':''} — click to download</div>`;
+      }catch(e){
+        // Canvas failed (likely CORS) — show CSS overlay instead, with raw image as download link
+        cell.style.position='relative';
+        cell.innerHTML=`
+          <div style="position:relative;border-radius:var(--radius);overflow:hidden">
+            <img src="${url}" alt="thumbnail ${i+1}" style="width:100%;display:block" />
+            ${text?`<div style="position:absolute;bottom:0;left:0;right:0;padding:24px 20px;background:linear-gradient(to top, rgba(0,0,0,0.6), transparent);">
+              <div style="font-family:Arial,sans-serif;font-weight:900;font-size:28px;line-height:1.2;color:#FFD24A;text-shadow:2px 2px 0 rgba(0,0,0,0.85), -1px -1px 0 rgba(0,0,0,0.85), 1px -1px 0 rgba(0,0,0,0.85), -1px 1px 0 rgba(0,0,0,0.85);text-transform:uppercase">${text}</div>
+            </div>`:''}
+          </div>
+          <a href="${url}" download="thumbnail-${i+1}-background.jpg" target="_blank" class="dl-btn" style="margin-top:8px">↓ Download background (add text in CapCut)</a>
+          <div class="thumb-label">Option ${i+1}${text?': "'+text+'"':''}</div>`;
+      }
+    }else{
+      cell.innerHTML=`<div class="img-fail" style="aspect-ratio:16/9">Failed</div><div class="thumb-label">Option ${i+1}</div>`;
+    }
+    tw.appendChild(cell);
+  }
+}
+
+let currentImages=null;
+
+function renderImagesOutput(images){
+  currentImages=images;
+  const grid=document.getElementById('out-images');
+  grid.innerHTML='';
+  images.forEach(img=>{
+    const cell=document.createElement('div');
+    cell.className='img-cell';
+    if(img.url){
+      cell.innerHTML=`<a href="${img.url}" download="${img.timestamp.replace(':','-')}.jpg" target="_blank"><img src="${img.url}" alt="scene ${img.timestamp}" /></a><div class="img-ts">${img.timestamp}</div>`;
+    }else{
+      cell.innerHTML=`<div class="img-fail">Failed</div><div class="img-ts">${img.timestamp}</div>`;
+    }
+    grid.appendChild(cell);
+  });
+}
+
+async function downloadAllImagesZip(){
+  if(!currentImages){return}
+  const btn=document.getElementById('zip-btn');
+  btn.disabled=true;
+  const zip=new JSZip();
+  let done=0;
+  const total=currentImages.filter(i=>i.url).length;
+  for(const img of currentImages){
+    if(!img.url)continue;
+    btn.textContent=`Packaging ${done+1}/${total}...`;
+    try{
+      const res=await fetch(img.url);
+      const blob=await res.blob();
+      const filename=img.timestamp.replace(':','-')+'.jpg';
+      zip.file(filename,blob);
+    }catch(e){}
+    done++;
+  }
+  btn.textContent='Zipping...';
+  const content=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(content);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='quiet-capital-scene-images.zip';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  btn.disabled=false;
+  btn.textContent='Download all as ZIP →';
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.style.display=msg?'block':'none';
+}
+</script>
+</body>
+</html>
